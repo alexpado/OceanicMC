@@ -2,3 +2,5 @@
 build/*
 # Exclude local server directory
 srv/*
+# Exclude .gradle directory
+.gradle/*
