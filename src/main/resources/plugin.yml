@@ -1,0 +1,8 @@
+name: Oceanic
+version: @version@
+main: fr.alexpado.minecraft.Oceanic
+api-version: '1.13'
+prefix: Oceanic
+authors: [alexpado]
+description: Live and Survive in the ocean or be a casual land player
+website: https://github.com/alexpado

@@ -1,0 +1,4 @@
+# Exclude build directory
+build/*
+# Exclude local server directory
+srv/*
