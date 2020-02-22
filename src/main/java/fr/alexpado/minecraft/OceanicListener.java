@@ -48,10 +48,16 @@ public class OceanicListener implements Listener {
             if (team.equalsIgnoreCase("aqua")) {
                 memory.joinAqua(event.getPlayer());
                 event.getPlayer().sendTitle(Title.builder().title("Run for water !").subtitle("You have 1 minute !").build());
-                memory.addTeleport(event.getPlayer());
+                if (event.getPlayer().getBedSpawnLocation() == null) {
+                    memory.addTeleport(event.getPlayer());
+                }
             } else if (team.equalsIgnoreCase("land")) {
                 memory.joinLand(event.getPlayer());
-                memory.addTeleport(event.getPlayer());
+                if (event.getPlayer().getBedSpawnLocation() == null) {
+                    memory.addTeleport(event.getPlayer());
+                }
+
+
             }
             event.setCancelled(true);
         }
