@@ -58,7 +58,11 @@ public class OceanicUtils {
     }
 
     public static PotionEffect getConduitPowerEffect() {
-        return new PotionEffect(PotionEffectType.CONDUIT_POWER, 20 * 3600, 0);
+        return new PotionEffect(PotionEffectType.CONDUIT_POWER, 20 * 3600, 5);
+    }
+
+    public static PotionEffect getWaterBreathingEffect() {
+        return new PotionEffect(PotionEffectType.WATER_BREATHING, 20 * 60, 0);
     }
 
     public static PotionEffect getSlownessEffect() {

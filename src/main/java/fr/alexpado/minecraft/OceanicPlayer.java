@@ -1,11 +1,18 @@
 package fr.alexpado.minecraft;
 
+import org.bukkit.Bukkit;
+import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
+import org.bukkit.boss.BarColor;
+import org.bukkit.boss.BarStyle;
+import org.bukkit.boss.BossBar;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.scoreboard.Score;
 
 /**
  * Class handling player's properties specific to the Oceanic plugin.
@@ -15,18 +22,31 @@ import org.bukkit.potion.PotionEffectType;
  */
 public class OceanicPlayer implements Runnable {
 
-    private OceanicMemory oceanic;
+    private OceanicMemory oceanicMemory;
+    private Score score;
     private Player player;
     private int maxAllowedOxygen = 300;
     private int maxOxygen = 300;
     private int oxygen;
     private boolean hasDrowned = false;
+    private BossBar bar;
+    private int waterBreathingRunningFor = 0;
+    private int lastWaterBreathingDuration = 0;
+    private boolean wasInTeam = false;
 
-    public OceanicPlayer(OceanicMemory oceanic, Player player) {
+    public OceanicPlayer(OceanicMemory oceanicMemory, Player player) {
         this.player = player;
-        this.oceanic = oceanic;
+        this.oceanicMemory = oceanicMemory;
+        this.score = this.oceanicMemory.getOxygenMemory(player);
+        this.oxygen = this.score.getScore();
 
-        this.oxygen = this.oceanic.getOxygenMemory(player).getScore();
+        NamespacedKey key = new NamespacedKey(this.oceanicMemory.getOceanic(), this.player.getName());
+
+        this.bar = Bukkit.getBossBar(key);
+        if (this.bar == null) {
+            this.bar = Bukkit.createBossBar(key, "Water Breathing", BarColor.BLUE, BarStyle.SOLID);
+        }
+        this.bar.addPlayer(player);
     }
 
     /**
@@ -42,12 +62,39 @@ public class OceanicPlayer implements Runnable {
             return; // This player is cheating :(
         }
 
-        if (!this.oceanic.isAqua(this.player)) {
+        if (!this.oceanicMemory.isInTeam(this.player)) {
+            this.wasInTeam = false;
+            this.player.sendTitle("Choose a team", "#aqua or #land in the chat !", 0, 5, 0);
+            return;
+        }
+
+        if (!this.oceanicMemory.isAqua(this.player)) {
             if (this.player.getPotionEffect(PotionEffectType.CONDUIT_POWER) != null) {
                 this.player.removePotionEffect(PotionEffectType.CONDUIT_POWER);
             }
             return; // This player is not funny.
         }
+
+        if (!wasInTeam) {
+            this.player.addPotionEffect(OceanicUtils.getWaterBreathingEffect());
+            wasInTeam = true;
+        }
+
+        PotionEffect potionEffect = this.player.getPotionEffect(PotionEffectType.WATER_BREATHING);
+
+        if (potionEffect != null) {
+            if (this.lastWaterBreathingDuration > potionEffect.getDuration()) {
+                this.waterBreathingRunningFor = this.lastWaterBreathingDuration;
+            }
+            this.waterBreathingRunningFor = Math.max(this.waterBreathingRunningFor, potionEffect.getDuration());
+            this.bar.setProgress((double) potionEffect.getDuration() / (double) this.waterBreathingRunningFor);
+            this.bar.setVisible(true);
+        } else {
+            this.bar.setVisible(false);
+            this.waterBreathingRunningFor = 0;
+            this.lastWaterBreathingDuration = 0;
+        }
+
 
         if (player.isDead()) {
             this.oxygen = maxOxygen;
@@ -62,12 +109,16 @@ public class OceanicPlayer implements Runnable {
                 this.oxygen = 2;
             } else if (this.oxygen > this.maxAllowedOxygen) {
                 this.oxygen = this.maxAllowedOxygen;
-            } else {
+            } else if (this.oxygen + 2 <= this.maxAllowedOxygen) {
                 this.oxygen += 2;
+            } else {
+                this.oxygen = this.maxAllowedOxygen;
             }
         } else {
             this.oxygen--;
         }
+
+        this.score.setScore(this.oxygen);
 
         if (this.oxygen < 0 && this.oxygen % 20 == 0) {
             if (this.player.getHealth() - 2 < 0) {
@@ -140,5 +191,10 @@ public class OceanicPlayer implements Runnable {
         boolean b = hasDrowned;
         hasDrowned = false;
         return b;
+    }
+
+    public void setOxygen(int oxygen) {
+        this.oxygen = oxygen;
+        this.score.setScore(oxygen);
     }
 }

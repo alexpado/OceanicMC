@@ -8,7 +8,9 @@ import org.bukkit.scoreboard.Score;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 
 public class OceanicMemory implements Runnable {
@@ -18,14 +20,18 @@ public class OceanicMemory implements Runnable {
 
     private static final String OXYGEN = "oxygen";
 
+    private Oceanic oceanic;
+
     private HashMap<UUID, OceanicPlayer> players = new HashMap<>();
+    private List<Player> playerToTeleport = new ArrayList<>();
 
     private Scoreboard scoreboard;
     private Team aqua;
     private Team land;
     private Objective objective;
 
-    public OceanicMemory(Scoreboard scoreboard) {
+    public OceanicMemory(Oceanic oceanic, Scoreboard scoreboard) {
+        this.oceanic = oceanic;
         this.scoreboard = scoreboard;
         this.install();
 
@@ -85,6 +91,7 @@ public class OceanicMemory implements Runnable {
 
     public void joinAqua(Player player) {
         this.aqua.addEntry(player.getName());
+        this.getPlayer(player).setOxygen(300);
     }
 
     public void joinLand(Player player) {
@@ -125,8 +132,21 @@ public class OceanicMemory implements Runnable {
         this.objective = null;
     }
 
+    public Oceanic getOceanic() {
+        return oceanic;
+    }
+
     @Override
     public void run() {
+        for (Player player : this.playerToTeleport) {
+            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "spreadplayers ~ ~ 20000 50000 false " + player.getName());
+        }
+        this.playerToTeleport.clear();
+
         this.players.values().forEach(OceanicPlayer::run);
+    }
+
+    public void addTeleport(Player player) {
+        this.playerToTeleport.add(player);
     }
 }

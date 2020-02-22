@@ -11,7 +11,7 @@ public final class Oceanic extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        this.oceanicMemory = new OceanicMemory(Bukkit.getScoreboardManager().getMainScoreboard());
+        this.oceanicMemory = new OceanicMemory(this, Bukkit.getScoreboardManager().getMainScoreboard());
         this.task = Bukkit.getScheduler().runTaskTimer(this, this.oceanicMemory, 0L, 1L);
         this.getServer().getPluginManager().registerEvents(new OceanicListener(this), this);
     }
