@@ -33,7 +33,7 @@ public class OceanicPlayer implements Runnable {
     private BossBar bar;
     private int waterBreathingRunningFor = 0;
     private int lastWaterBreathingDuration = 0;
-    private boolean wasInTeam = true;
+    private boolean applySpawnWaterBreathing = true;
 
     public OceanicPlayer(OceanicMemory oceanicMemory, Player player) {
         this.player = player;
@@ -51,42 +51,9 @@ public class OceanicPlayer implements Runnable {
     }
 
     /**
-     * This should be called every tick. As such, this method need to stay optimized AF boi.
+     * This will refresh the Water Breathing {@link BossBar} display.
      */
-    @Override
-    public void run() {
-        if (!player.isOnline()) {
-            return; // Why are still here ... *sad music intensifies*
-        }
-
-        Block block = OceanicUtils.getEffectiveBlock(this.player, false);
-
-        if (this.player.isOp() && this.player.getGameMode() == GameMode.CREATIVE) {
-            this.player.sendActionBar(block.getType().name());
-        }
-
-        if (!OceanicUtils.canTakeDamage(this.player)) {
-            return; // This player is cheating :(
-        }
-
-        if (!this.oceanicMemory.isInTeam(this.player)) {
-            this.wasInTeam = false;
-            this.player.sendTitle("Choose a team", "#aqua or #land in the chat !", 0, 5, 0);
-            return;
-        }
-
-        if (!this.oceanicMemory.isAqua(this.player)) {
-            if (this.player.getPotionEffect(PotionEffectType.CONDUIT_POWER) != null) {
-                this.player.removePotionEffect(PotionEffectType.CONDUIT_POWER);
-            }
-            return; // This player is not funny.
-        }
-
-        if (!wasInTeam) {
-            this.player.addPotionEffect(OceanicUtils.getWaterBreathingEffect());
-            wasInTeam = true;
-        }
-
+    private void refreshWaterBreathingBar() {
         PotionEffect potionEffect = this.player.getPotionEffect(PotionEffectType.WATER_BREATHING);
 
         if (potionEffect != null) {
@@ -101,7 +68,44 @@ public class OceanicPlayer implements Runnable {
             this.waterBreathingRunningFor = 0;
             this.lastWaterBreathingDuration = 0;
         }
+    }
 
+    /**
+     * This will show the current {@link Block} at {@link Player}'s eyes position for debugging purposes.
+     */
+    private void sendDebugBlock() {
+        Block block = OceanicUtils.getEffectiveBlock(this.player, true);
+
+        if (this.player.isOp() && this.player.getGameMode() == GameMode.CREATIVE) {
+            this.player.sendActionBar(block.getType().name());
+        }
+    }
+
+    /**
+     * If the player isn't in a team, it will ask to join on by displaying a message on his/her screen.
+     *
+     * @return True if the message has been displayed, false instead.
+     */
+    private boolean chooseTeam() {
+        if (!this.oceanicMemory.isInTeam(this.player)) {
+            this.player.sendTitle("Choose a team", "#aqua or #land in the chat !", 0, 5, 0);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Called every tick if the {@link Player} is in the Aqua team.
+     */
+    private void doAquaStuff() {
+        Block block = OceanicUtils.getEffectiveBlock(this.player, true);
+        if (OceanicUtils.isInWater(block)) {
+            if (this.player.getPotionEffect(PotionEffectType.CONDUIT_POWER) == null) {
+                this.player.addPotionEffect(OceanicUtils.getConduitPowerEffect());
+            }
+        } else {
+            this.player.removePotionEffect(PotionEffectType.CONDUIT_POWER);
+        }
 
         if (player.isDead()) {
             this.oxygen = maxOxygen;
@@ -133,20 +137,48 @@ public class OceanicPlayer implements Runnable {
         }
 
         player.setRemainingAir(this.getDisplayRemainingAir());
+    }
 
-
-        if (OceanicUtils.shouldBeSlow(block)) {
-            this.player.addPotionEffect(OceanicUtils.getSlownessEffect());
-        }
-
-        block = OceanicUtils.getEffectiveBlock(this.player, true);
-        if (OceanicUtils.isInWater(block)) {
-            if (this.player.getPotionEffect(PotionEffectType.CONDUIT_POWER) == null) {
-                this.player.addPotionEffect(OceanicUtils.getConduitPowerEffect());
-            }
-        } else {
+    /**
+     * Called every tick if the {@link Player} is in the Land team.
+     */
+    private void doLandStuff() {
+        if (this.player.getPotionEffect(PotionEffectType.CONDUIT_POWER) != null) {
             this.player.removePotionEffect(PotionEffectType.CONDUIT_POWER);
         }
+    }
+
+    /**
+     * This should be called every tick. As such, this method need to stay optimized AF boi.
+     */
+    @Override
+    public void run() {
+        if (!player.isOnline()) {
+            return; // Why are still here ... *sad music intensifies*
+        }
+
+        this.refreshWaterBreathingBar();
+        this.sendDebugBlock();
+
+        if (OceanicUtils.cannotTakeDamage(this.player)) {
+            return; // This player is cheating :(
+        }
+
+        if (this.chooseTeam()) {
+            return;
+        }
+
+        if (applySpawnWaterBreathing) {
+            this.player.addPotionEffect(OceanicUtils.getWaterBreathingEffect());
+            applySpawnWaterBreathing = false;
+        }
+
+        if (this.oceanicMemory.isAqua(this.player)) {
+            this.doAquaStuff();
+        } else if (this.oceanicMemory.isLand(this.player)) {
+            this.doLandStuff();
+        }
+
     }
 
     private int getDisplayRemainingAir() {
@@ -193,14 +225,29 @@ public class OceanicPlayer implements Runnable {
         }
     }
 
+    /**
+     * Check if the player could have died from suffocating in the air.
+     *
+     * @return True if the player suffocated in the air, false instead.
+     */
     public boolean hasDrowned() {
         boolean b = hasDrowned;
         hasDrowned = false;
         return b;
     }
 
+    /**
+     * Set the level of oxygen.
+     *
+     * @param oxygen
+     *         Level of oxygen
+     */
     public void setOxygen(int oxygen) {
         this.oxygen = oxygen;
         this.score.setScore(oxygen);
+    }
+
+    public void applySpawnWaterBreathingOnNextTick() {
+        this.applySpawnWaterBreathing = true;
     }
 }
