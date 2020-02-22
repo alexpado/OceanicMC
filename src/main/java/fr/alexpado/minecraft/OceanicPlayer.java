@@ -139,6 +139,7 @@ public class OceanicPlayer implements Runnable {
             this.player.addPotionEffect(OceanicUtils.getSlownessEffect());
         }
 
+        block = OceanicUtils.getEffectiveBlock(this.player, true);
         if (OceanicUtils.isInWater(block)) {
             if (this.player.getPotionEffect(PotionEffectType.CONDUIT_POWER) == null) {
                 this.player.addPotionEffect(OceanicUtils.getConduitPowerEffect());
