@@ -33,7 +33,7 @@ public class OceanicPlayer implements Runnable {
     private BossBar bar;
     private int waterBreathingRunningFor = 0;
     private int lastWaterBreathingDuration = 0;
-    private boolean applySpawnWaterBreathing = true;
+    private boolean applySpawnWaterBreathing = false;
 
     public OceanicPlayer(OceanicMemory oceanicMemory, Player player) {
         this.player = player;
