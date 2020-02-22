@@ -56,8 +56,6 @@ public class OceanicListener implements Listener {
                 if (event.getPlayer().getBedSpawnLocation() == null) {
                     memory.addTeleport(event.getPlayer());
                 }
-
-
             }
             event.setCancelled(true);
         }
