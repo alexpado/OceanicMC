@@ -1,6 +1,7 @@
 package fr.alexpado.minecraft;
 
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
 import org.bukkit.boss.BarColor;
@@ -58,6 +59,12 @@ public class OceanicPlayer implements Runnable {
             return; // Why are still here ... *sad music intensifies*
         }
 
+        Block block = OceanicUtils.getEffectiveBlock(this.player, false);
+
+        if (this.player.isOp() && this.player.getGameMode() == GameMode.CREATIVE) {
+            this.player.sendActionBar(block.getType().name());
+        }
+
         if (!OceanicUtils.canTakeDamage(this.player)) {
             return; // This player is cheating :(
         }
@@ -101,8 +108,6 @@ public class OceanicPlayer implements Runnable {
             this.maxAllowedOxygen = maxOxygen;
             return;
         }
-
-        Block block = OceanicUtils.getEffectiveBlock(this.player, false);
 
         if (this.canBreath()) {
             if (this.oxygen <= 0) {
