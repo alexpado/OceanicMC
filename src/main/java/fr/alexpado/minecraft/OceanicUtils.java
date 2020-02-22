@@ -1,7 +1,7 @@
 package fr.alexpado.minecraft;
 
-import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.data.Levelled;
 import org.bukkit.block.data.Waterlogged;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
@@ -20,29 +20,36 @@ public class OceanicUtils {
     }
 
     public static boolean isInWater(Block block) {
-        if (block.getType() == Material.WATER) {
-            return true;
-        }
-        return block.getBlockData() instanceof Waterlogged && ((Waterlogged) block.getBlockData()).isWaterlogged();
+        return isBreathable(block);
     }
 
     public static boolean isBreathable(Block block) {
         switch (block.getType()) {
             case WATER:
             case KELP_PLANT:
+            case KELP:
             case SEAGRASS:
-            case TALL_GRASS:
+            case TALL_SEAGRASS:
+            case BUBBLE_COLUMN:
                 return true;
             default:
-                return block.getBlockData() instanceof Waterlogged && ((Waterlogged) block.getBlockData()).isWaterlogged();
+                if (block.getBlockData() instanceof Waterlogged) {
+                    Waterlogged waterlogged = ((Waterlogged) block.getBlockData());
+                    return waterlogged.isWaterlogged();
+                } else if (block.getBlockData() instanceof Levelled) {
+                    Levelled levelled = ((Levelled) block.getBlockData());
+                    return levelled.getLevel() == levelled.getMaximumLevel();
+                }
+                return false;
         }
     }
 
     public static boolean shouldBeSlow(Block block) {
         switch (block.getType()) {
             case KELP_PLANT:
+            case KELP:
             case SEAGRASS:
-            case TALL_GRASS:
+            case TALL_SEAGRASS:
                 return true;
             default:
                 return false;
