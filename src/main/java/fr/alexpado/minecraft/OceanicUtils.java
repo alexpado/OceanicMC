@@ -1,11 +1,17 @@
 package fr.alexpado.minecraft;
 
+import org.bukkit.Color;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.Levelled;
 import org.bukkit.block.data.Waterlogged;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+
+import java.util.Arrays;
 
 public class OceanicUtils {
 
@@ -74,6 +80,52 @@ public class OceanicUtils {
 
     public static PotionEffect getSlownessEffect() {
         return new PotionEffect(PotionEffectType.CONDUIT_POWER, 5, 0);
+    }
+
+    public static ItemStack getWaterBreathingPotion(int levelOfLuck) {
+        ItemStack item = new ItemStack(Material.POTION);
+        PotionMeta meta = ((PotionMeta) item.getItemMeta());
+
+        switch (levelOfLuck) {
+            case 1:
+                meta.setDisplayName("Water Breathing Potion");
+                meta.addCustomEffect(new PotionEffect(PotionEffectType.WATER_BREATHING, 20 * 90, 0), false);
+                meta.setColor(Color.AQUA);
+
+                item.setLore(Arrays.asList(
+                        "§a§lCommon",
+                        "Weak, but can be useful"
+                ));
+                break;
+            case 2:
+                meta.setDisplayName("Water Breathing Potion");
+                meta.addCustomEffect(new PotionEffect(PotionEffectType.WATER_BREATHING, 20 * 60 * 3, 0), false);
+                meta.setColor(Color.AQUA);
+                item.setLore(Arrays.asList(
+                        "§a§lRare",
+                        "3 minutes ? Now we're talking !"
+                ));
+                break;
+            case 3:
+                meta.setDisplayName("Water Breathing Potion");
+                meta.addCustomEffect(new PotionEffect(PotionEffectType.WATER_BREATHING, 20 * 60 * 8, 0), false);
+                meta.setColor(Color.AQUA);
+                item.setLore(Arrays.asList(
+                        "§6§lOMG",
+                        "8 minutes ? With a fishing rod ?! Welp, you're damn lucky."
+                ));
+                break;
+            default:
+                meta.setDisplayName("Water Breathing Potion");
+                meta.addCustomEffect(new PotionEffect(PotionEffectType.WATER_BREATHING, 20 * 45, 0), false);
+                meta.setColor(Color.AQUA);
+                item.setLore(Arrays.asList(
+                        "§7§lWeak",
+                        "Only 45s ?! This is pretty useless."
+                ));
+        }
+        item.setItemMeta(meta);
+        return item;
     }
 
 }

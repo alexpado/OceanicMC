@@ -3,8 +3,9 @@ package fr.alexpado.minecraft;
 import com.destroystokyo.paper.Title;
 import com.destroystokyo.paper.loottable.LootableInventory;
 import org.bukkit.Bukkit;
-import org.bukkit.Color;
 import org.bukkit.Material;
+import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -14,12 +15,8 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.PotionMeta;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
@@ -54,6 +51,7 @@ public class OceanicListener implements Listener {
                 memory.addTeleport(event.getPlayer());
             } else if (team.equalsIgnoreCase("land")) {
                 memory.joinLand(event.getPlayer());
+                memory.addTeleport(event.getPlayer());
             }
             event.setCancelled(true);
         }
@@ -112,14 +110,34 @@ public class OceanicListener implements Listener {
         }
 
         if (new Random().nextBoolean()) {
-            ItemStack item = new ItemStack(Material.POTION);
-            PotionMeta meta = ((PotionMeta) item.getItemMeta());
-            meta.setDisplayName("Weak Water Breathing Potion");
-            meta.addCustomEffect(new PotionEffect(PotionEffectType.WATER_BREATHING, 20 * 45, 0), false);
-            meta.setColor(Color.AQUA);
-            item.setItemMeta(meta);
-            item.setLore(Collections.singletonList("Weak potion, but it can be useful."));
+            ItemStack item = OceanicUtils.getWaterBreathingPotion(0);
             event.getInventory().addItem(item);
+        }
+    }
+
+    @EventHandler
+    public void onFishing(PlayerFishEvent event) {
+        if (event.getCaught() != null && event.getCaught() instanceof Item) {
+            Item item = ((Item) event.getCaught());
+            ItemStack itemStack = item.getItemStack();
+
+            if (itemStack.getType() == Material.ENCHANTED_BOOK) {
+                return; // Don't cancel this enchanted book, it could be mending :(
+            }
+
+            int roll = new Random().nextInt(10) + 1;
+            if (roll == 8) { // Hey, take that potion bro.
+                ItemStack playerHand = event.getPlayer().getInventory().getItemInMainHand();
+
+                if (playerHand.getType() != Material.FISHING_ROD) {
+                    return; // How did you even get here ?!
+                }
+
+                int level = playerHand.getItemMeta().getEnchantLevel(Enchantment.LUCK);
+                int rnd = new Random().nextInt(level + 1);
+                ItemStack potion = OceanicUtils.getWaterBreathingPotion(rnd);
+                item.setItemStack(potion);
+            }
         }
     }
 
