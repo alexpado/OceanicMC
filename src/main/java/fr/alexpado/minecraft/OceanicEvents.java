@@ -33,7 +33,6 @@ public class OceanicEvents {
 
         // Register all listener here.
         Bukkit.getServer().getPluginManager().registerEvents(new AsyncPlayerChatListener(oceanic), oceanic);
-        Bukkit.getServer().getPluginManager().registerEvents(new InventoryEditListener(oceanic), oceanic);
         Bukkit.getServer().getPluginManager().registerEvents(new LootGeneratedListener(oceanic), oceanic);
         Bukkit.getServer().getPluginManager().registerEvents(new PlayerDeathListener(oceanic), oceanic);
         Bukkit.getServer().getPluginManager().registerEvents(new PlayerFishEvent(oceanic), oceanic);
