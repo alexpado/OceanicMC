@@ -8,9 +8,7 @@ import org.bukkit.scoreboard.Score;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.UUID;
 
 public class OceanicMemory implements Runnable {
@@ -18,17 +16,17 @@ public class OceanicMemory implements Runnable {
     /**
      * Name of the aqua team.
      */
-    private static final String TEAM_AQUA = "aqua";
+    public static final String TEAM_AQUA = "aqua";
 
     /**
      * Name of the land team.
      */
-    private static final String TEAM_LAND = "land";
+    public static final String TEAM_LAND = "land";
 
     /**
      * Name of the oxygen objective.
      */
-    private static final String OXYGEN = "oxygen";
+    public static final String OXYGEN = "oxygen";
 
     /**
      * Hold the {@link Oceanic} instance.
@@ -39,11 +37,6 @@ public class OceanicMemory implements Runnable {
      * Hold the map between a {@link Player}'s {@link UUID} and its {@link OceanicPlayer} instance.
      */
     private HashMap<UUID, OceanicPlayer> players = new HashMap<>();
-
-    /**
-     * List of {@link Player} to teleport randomly on the next tick.
-     */
-    private List<Player> playerToTeleport = new ArrayList<>();
 
     /**
      * Hold the {@link Scoreboard} instance containing the teams and the objectives.
@@ -70,12 +63,10 @@ public class OceanicMemory implements Runnable {
      *
      * @param oceanic
      *         {@link Oceanic} plugin instance.
-     * @param scoreboard
-     *         Main {@link Scoreboard} instance.
      */
-    public OceanicMemory(Oceanic oceanic, Scoreboard scoreboard) {
+    public OceanicMemory(Oceanic oceanic) {
         this.oceanic = oceanic;
-        this.scoreboard = scoreboard;
+        this.scoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
         this.install();
 
         for (Player player : Bukkit.getOnlinePlayers()) {
@@ -177,27 +168,6 @@ public class OceanicMemory implements Runnable {
     }
 
     /**
-     * Make the provided {@link Player} joins the Aqua team.
-     *
-     * @param player
-     *         {@link} Player instance.
-     */
-    public void joinAqua(Player player) {
-        this.aqua.addEntry(player.getName());
-        this.getPlayer(player).setOxygen(300);
-    }
-
-    /**
-     * Make the provided {@link Player} joins the Land team.
-     *
-     * @param player
-     *         {@link} Player instance.
-     */
-    public void joinLand(Player player) {
-        this.land.addEntry(player.getName());
-    }
-
-    /**
      * Make the provided {@link Player} leave any team.
      *
      * @param player
@@ -228,7 +198,7 @@ public class OceanicMemory implements Runnable {
      *         {@link} Player instance.
      */
     public void registerPlayer(Player player) {
-        this.players.put(player.getUniqueId(), new OceanicPlayer(this, player));
+        this.players.put(player.getUniqueId(), new OceanicPlayer(this.oceanic, this, player));
     }
 
     /**
@@ -264,6 +234,11 @@ public class OceanicMemory implements Runnable {
         this.objective = null;
     }
 
+    @Override
+    public void run() {
+        this.players.values().forEach(OceanicPlayer::run);
+    }
+
     /**
      * Retrieve the {@link Oceanic} instance used to create this {@link OceanicMemory}.
      *
@@ -273,27 +248,4 @@ public class OceanicMemory implements Runnable {
         return oceanic;
     }
 
-    /**
-     * Called every tick. Provide the main execution flow for the plugin.
-     */
-    @Override
-    public void run() {
-        // Check for all player to teleport randomly.
-        for (Player player : this.playerToTeleport) {
-            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "spreadplayers ~ ~ 20000 50000 false " + player.getName());
-        }
-        this.playerToTeleport.clear();
-
-        this.players.values().forEach(OceanicPlayer::run);
-    }
-
-    /**
-     * Add the provided {@link Player} to the teleport list.
-     *
-     * @param player
-     *         {@link Player} instance.
-     */
-    public void addTeleport(Player player) {
-        this.playerToTeleport.add(player);
-    }
 }

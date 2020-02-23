@@ -1,15 +1,8 @@
 package fr.alexpado.minecraft;
 
-import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scheduler.BukkitTask;
 
 public final class Oceanic extends JavaPlugin {
-
-    /**
-     * Hold the {@link BukkitTask} instance where all the magic of the plugin happen.
-     */
-    private BukkitTask task;
 
     /**
      * Hold the {@link OceanicMemory} instance where all global data processing happen.
@@ -17,13 +10,17 @@ public final class Oceanic extends JavaPlugin {
     private OceanicMemory oceanicMemory;
 
     /**
+     * Hold the {@link OceanicEvents} instance where all custom event are dispatched.
+     */
+    private OceanicEvents oceanicEvents;
+
+    /**
      * Entry point for the {@link Oceanic} plugin. Called when the plugin starts.
      */
     @Override
     public void onEnable() {
-        this.oceanicMemory = new OceanicMemory(this, Bukkit.getScoreboardManager().getMainScoreboard());
-        this.task = Bukkit.getScheduler().runTaskTimer(this, this.oceanicMemory, 0L, 1L);
-        this.getServer().getPluginManager().registerEvents(new OceanicListener(this), this);
+        this.oceanicMemory = new OceanicMemory(this);
+        this.oceanicEvents = new OceanicEvents(this);
     }
 
     /**
@@ -31,11 +28,11 @@ public final class Oceanic extends JavaPlugin {
      */
     @Override
     public void onDisable() {
-        Bukkit.getScheduler().cancelTask(this.task.getTaskId());
         this.oceanicMemory.dispose();
+        this.oceanicEvents.stop();
 
-        this.task = null;
         this.oceanicMemory = null;
+        this.oceanicEvents = null;
     }
 
     /**
@@ -43,5 +40,12 @@ public final class Oceanic extends JavaPlugin {
      */
     public OceanicMemory getOceanicMemory() {
         return oceanicMemory;
+    }
+
+    /**
+     * @return {@link OceanicEvents} instance.
+     */
+    public OceanicEvents getOceanicEvents() {
+        return oceanicEvents;
     }
 }
