@@ -22,8 +22,12 @@ public class OxygenProperty {
         this.score = score;
     }
 
-    public void setRepirationLevel(int level) {
+    public void setRepirationLevel(int level, boolean force) {
         this.maxAllowedOxygen = this.maxVanillaOxygen + (level * 15 * 20);
+
+        if (force) {
+            this.oxygen = this.maxAllowedOxygen;
+        }
     }
 
     public void breath() {

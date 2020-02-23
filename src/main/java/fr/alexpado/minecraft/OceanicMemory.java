@@ -212,16 +212,6 @@ public class OceanicMemory implements Runnable {
     }
 
     /**
-     * Check the provided {@link Player}'s inventory after an inventory update.
-     *
-     * @param player
-     *         {@link} Player instance.
-     */
-    public void checkPlayerInventory(Player player) {
-        this.players.get(player.getUniqueId()).checkInventory();
-    }
-
-    /**
      * Clear all resources used from this instance.
      */
     public void dispose() {

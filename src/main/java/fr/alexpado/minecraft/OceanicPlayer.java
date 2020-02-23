@@ -29,6 +29,8 @@ public class OceanicPlayer implements Runnable {
 
         this.waterBreathingBar = new WaterBreathingBar(oceanic, player);
         this.oxygenProperty = new OxygenProperty(player, memory.getOxygenMemory(player));
+
+        this.checkInventory(true);
     }
 
     /**
@@ -87,6 +89,8 @@ public class OceanicPlayer implements Runnable {
             return; // Why are still here ... *sad music intensifies*
         }
 
+        this.checkInventory(false);
+
         this.sendDebugBlock();
 
         if (OceanicUtils.cannotTakeDamage(this.player)) {
@@ -111,16 +115,19 @@ public class OceanicPlayer implements Runnable {
      * <p>
      * This method will change {@link #oxygenProperty} according to the enchant of the helmet instead of checking it
      * in {@link #run()} for performance reason.
+     *
+     * @param force
+     *         If set to true, the maximum allowed oxygen will be applied to the current oxygen value.
      */
-    public void checkInventory() {
+    public void checkInventory(boolean force) {
         PlayerInventory inventory = this.player.getInventory();
         ItemStack helmet = inventory.getHelmet();
 
         if (helmet != null) {
             int enchantLevel = helmet.getEnchantmentLevel(Enchantment.OXYGEN);
-            this.oxygenProperty.setRepirationLevel(enchantLevel);
+            this.oxygenProperty.setRepirationLevel(enchantLevel, force);
         } else {
-            this.oxygenProperty.setRepirationLevel(0);
+            this.oxygenProperty.setRepirationLevel(0, true);
         }
     }
 
