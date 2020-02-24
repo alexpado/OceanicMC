@@ -127,7 +127,7 @@ public class OceanicPlayer implements Runnable {
             int enchantLevel = helmet.getEnchantmentLevel(Enchantment.OXYGEN);
             this.oxygenProperty.setRepirationLevel(enchantLevel, force);
         } else {
-            this.oxygenProperty.setRepirationLevel(0, true);
+            this.oxygenProperty.setRepirationLevel(0, force);
         }
     }
 
