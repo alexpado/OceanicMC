@@ -36,3 +36,11 @@ You have multiple ways to loot a Water Breathing Potion
 
 ## Requirement
 This plugin has been tested on **Minecraft 1.15.2** but should be compatible with **Minecraft 1.13+**.
+**Note :** No other plugin were installed during tests. If you find any incompatibilty, please open an issue !
+
+## Original Idea
+The idea come from a datapack created by @Roark_Cats (Twitter) played by WadZee (YouTube). I liked the idea and decided to code it as a plugin !
+
+Please support @Roark_Cats on Patreon : https://www.patreon.com/zipcats
+
+My Patreon : https://www.patreon.com/alexpado
