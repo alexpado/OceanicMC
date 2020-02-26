@@ -44,7 +44,7 @@ public class AsyncPlayerChatListener extends OceanicAbstractListener {
             return;
         }
 
-        Team team = scoreboard.getTeam(OceanicMemory.TEAM_AQUA);
+        Team team = scoreboard.getTeam(teamName);
 
         if (team == null) {
             this.getOceanic().getLogger().log(Level.SEVERE, "The team `" + teamName + "` couldn't be found. Please restart or reload the server to fix this.");
